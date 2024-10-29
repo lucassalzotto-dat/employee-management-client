@@ -40,10 +40,10 @@ export const updateSchedule = async (scheduleId, scheduleData, token) => {
   }
 };
 
-// Nueva función para obtener el horario del empleado
-export const fetchEmployeeSchedule = async (employeeId, token) => {
+// src/services/scheduleService.js
+export const getEmployeeSchedule = async (token, id_empleado) => {
   try {
-    const response = await axios.get(`${API_URL}/schedules/employee/${employeeId}`, {
+    const response = await axios.get(`${API_URL}/schedules/employee/${id_empleado}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
