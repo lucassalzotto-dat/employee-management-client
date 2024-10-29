@@ -1,11 +1,12 @@
 // src/App.js
 import React, { useContext } from 'react';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Link, Navigate } from 'react-router-dom';
 import AuthContext from './context/AuthContext';
 import Login from './pages/Login';
 import EmployeeList from './pages/EmployeeList';
 import ScheduleList from './pages/ScheduleList';
 import ScheduleRequestList from './pages/ScheduleRequestList';
+import EmployeeSchedule from './pages/EmployeeSchedule';
 
 const App = () => {
   const { user } = useContext(AuthContext);
@@ -24,16 +25,23 @@ const App = () => {
                 <Link to="/login" className="nav-link">Login</Link>
               </li>
               {user && user.rol === 'admin' && (
+                <>
+                  <li className="nav-item">
+                    <Link to="/employees" className="nav-link">Empleados</Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link to="/schedules" className="nav-link">Horarios</Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link to="/schedule-requests" className="nav-link">Solicitudes de Cambio</Link>
+                  </li>
+                </>
+              )}
+              {user && user.rol === 'empleado' && (
                 <li className="nav-item">
-                  <Link to="/employees" className="nav-link">Empleados</Link>
+                  <Link to="/mi-horario" className="nav-link">Mi Horario</Link>
                 </li>
               )}
-              <li className="nav-item">
-                <Link to="/schedules" className="nav-link">Horarios</Link>
-              </li>
-              <li className="nav-item">
-                <Link to="/schedule-requests" className="nav-link">Solicitudes de Cambio</Link>
-              </li>
             </ul>
           </div>
         </div>
@@ -42,9 +50,20 @@ const App = () => {
       <div className="container mt-4">
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/employees" element={<EmployeeList />} />
-          <Route path="/schedules" element={<ScheduleList />} />
-          <Route path="/schedule-requests" element={<ScheduleRequestList />} />
+          {/* Rutas protegidas solo para el rol admin */}
+          {user?.rol === 'admin' && (
+            <>
+              <Route path="/employees" element={<EmployeeList />} />
+              <Route path="/schedules" element={<ScheduleList />} />
+              <Route path="/schedule-requests" element={<ScheduleRequestList />} /> {/* Corregido */}
+            </>
+          )}
+          {/* Ruta protegida solo para el rol empleado */}
+          {user?.rol === 'empleado' ? (
+            <Route path="/mi-horario" element={<EmployeeSchedule />} />
+          ) : (
+            <Route path="/mi-horario" element={<Navigate to="/" replace />} />
+          )}
         </Routes>
       </div>
     </Router>

@@ -8,10 +8,10 @@ const authHeader = (token) => ({
   headers: { Authorization: `Bearer ${token}` }
 });
 
-// Obtener la lista de empleados usando la nueva ruta `/all`
+// Obtener la lista de empleados usando la nueva ruta `/employees-with-schedules`
 export const fetchEmployees = async (token) => {
   try {
-    const response = await axios.get(`${API_URL}/employees/all`, authHeader(token)); // Cambiado a `/all`
+    const response = await axios.get(`${API_URL}/employees/all`, authHeader(token));
     return response.data;
   } catch (error) {
     console.error('Error al obtener empleados:', error.response?.data || error.message);
@@ -19,17 +19,16 @@ export const fetchEmployees = async (token) => {
   }
 };
 
-// employeeService.js
+// Crear un nuevo empleado (solo para admin) usando `/register-employee`
 export const createEmployee = async (employeeData, token) => {
   try {
-    const response = await axios.post(`${API_URL}/employees`, employeeData, authHeader(token));
-    return response.data; // Esto debería incluir el id del nuevo empleado
+    const response = await axios.post(`${API_URL}/users/register-employee`, employeeData, authHeader(token));
+    return response.data;
   } catch (error) {
     console.error('Error al crear empleado:', error.response?.data || error.message);
     throw error;
   }
 };
-
 
 // Actualizar un empleado existente
 export const updateEmployee = async (id, employeeData, token) => {

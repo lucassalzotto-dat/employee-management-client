@@ -1,7 +1,7 @@
 // src/pages/ScheduleList.js
 import React, { useContext, useEffect, useState } from 'react';
 import AuthContext from '../context/AuthContext';
-import { fetchEmployeesWithSchedules, assignSchedule } from '../services/scheduleService';
+import { fetchEmployeesWithSchedules, assignSchedule, updateSchedule } from '../services/scheduleService';
 
 const ScheduleList = () => {
   const { user } = useContext(AuthContext);
@@ -13,15 +13,14 @@ const ScheduleList = () => {
     hora_inicio: '',
     hora_fin: ''
   });
+  const [editingSchedule, setEditingSchedule] = useState(null);
 
-  // Función para formatear el tiempo
   const formatTime = (time) => {
     if (!time) return '';
-    const date = new Date(`1970-01-01T${time}Z`);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const [hour, minute] = time.split(':');
+    return `${hour}:${minute}`;
   };
 
-  // Obtener todos los empleados con sus horarios al montar el componente
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -35,13 +34,15 @@ const ScheduleList = () => {
     fetchData();
   }, [user.token]);
 
-  // Maneja el cambio en los campos del formulario para asignar un nuevo horario
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewSchedule((prev) => ({ ...prev, [name]: value }));
+    if (editingSchedule) {
+      setEditingSchedule((prev) => ({ ...prev, [name]: value }));
+    } else {
+      setNewSchedule((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
-  // Asigna un nuevo horario al empleado seleccionado y actualiza la lista
   const handleAssignSchedule = async (e) => {
     e.preventDefault();
     try {
@@ -60,6 +61,32 @@ const ScheduleList = () => {
     }
   };
 
+  const handleEditSchedule = (schedule) => {
+    setEditingSchedule(schedule);
+  };
+
+  const handleUpdateSchedule = async (e) => {
+    e.preventDefault();
+    try {
+      const updatedSchedule = await updateSchedule(editingSchedule.id, {
+        fecha: editingSchedule.fecha,
+        hora_inicio: editingSchedule.hora_inicio,
+        hora_fin: editingSchedule.hora_fin
+      }, user.token);
+      setEmployees((prevEmployees) =>
+        prevEmployees.map((emp) =>
+          emp.schedule && emp.schedule.id === editingSchedule.id
+            ? { ...emp, schedule: updatedSchedule }
+            : emp
+        )
+      );
+      setEditingSchedule(null);
+    } catch (error) {
+      console.error('Error al actualizar horario:', error);
+      setError('No se pudo actualizar el horario.');
+    }
+  };
+
   return (
     <div>
       <h1>Lista de Empleados y sus Horarios</h1>
@@ -69,9 +96,12 @@ const ScheduleList = () => {
           <li key={emp.id}>
             <strong>{emp.nombre}</strong> - {emp.posicion}
             {emp.schedule ? (
-              <p>
-                Horario: {emp.schedule.fecha} de {formatTime(emp.schedule.hora_inicio)} a {formatTime(emp.schedule.hora_fin)}
-              </p>
+              <>
+                <p>
+                  Horario: {emp.schedule.fecha} de {formatTime(emp.schedule.hora_inicio)} a {formatTime(emp.schedule.hora_fin)}
+                </p>
+                <button onClick={() => handleEditSchedule(emp.schedule)}>Editar Horario</button>
+              </>
             ) : (
               <p>Horario: No asignado</p>
             )}
@@ -79,48 +109,79 @@ const ScheduleList = () => {
         ))}
       </ul>
 
-      {/* Formulario para asignar un nuevo horario */}
-      <h2>Asignar Horario a un Empleado</h2>
-      <form onSubmit={handleAssignSchedule}>
-        <select
-          name="id_empleado"
-          value={newSchedule.id_empleado}
-          onChange={handleInputChange}
-          required
-        >
-          <option value="">Seleccione un empleado</option>
-          {employees.map((emp) => (
-            <option key={emp.id} value={emp.id}>
-              {emp.nombre} - {emp.posicion}
-            </option>
-          ))}
-        </select>
-        <input
-          type="date"
-          name="fecha"
-          placeholder="Fecha"
-          value={newSchedule.fecha}
-          onChange={handleInputChange}
-          required
-        />
-        <input
-          type="time"
-          name="hora_inicio"
-          placeholder="Hora de Inicio"
-          value={newSchedule.hora_inicio}
-          onChange={handleInputChange}
-          required
-        />
-        <input
-          type="time"
-          name="hora_fin"
-          placeholder="Hora de Fin"
-          value={newSchedule.hora_fin}
-          onChange={handleInputChange}
-          required
-        />
-        <button type="submit">Asignar Horario</button>
-      </form>
+      {editingSchedule ? (
+        <form onSubmit={handleUpdateSchedule}>
+          <h2>Editar Horario</h2>
+          <input
+            type="date"
+            name="fecha"
+            placeholder="Fecha"
+            value={editingSchedule.fecha}
+            onChange={handleInputChange}
+            required
+          />
+          <input
+            type="time"
+            name="hora_inicio"
+            placeholder="Hora de Inicio"
+            value={editingSchedule.hora_inicio}
+            onChange={handleInputChange}
+            required
+          />
+          <input
+            type="time"
+            name="hora_fin"
+            placeholder="Hora de Fin"
+            value={editingSchedule.hora_fin}
+            onChange={handleInputChange}
+            required
+          />
+          <button type="submit">Guardar Cambios</button>
+          <button type="button" onClick={() => setEditingSchedule(null)}>Cancelar</button>
+        </form>
+      ) : (
+        <form onSubmit={handleAssignSchedule}>
+          <h2>Asignar Horario a un Empleado</h2>
+          <select
+            name="id_empleado"
+            value={newSchedule.id_empleado}
+            onChange={handleInputChange}
+            required
+          >
+            <option value="">Seleccione un empleado</option>
+            {employees.map((emp) => (
+              <option key={emp.id} value={emp.id}>
+                {emp.nombre} - {emp.posicion}
+              </option>
+            ))}
+          </select>
+          <input
+            type="date"
+            name="fecha"
+            placeholder="Fecha"
+            value={newSchedule.fecha}
+            onChange={handleInputChange}
+            required
+          />
+          <input
+            type="time"
+            name="hora_inicio"
+            placeholder="Hora de Inicio"
+            value={newSchedule.hora_inicio}
+            onChange={handleInputChange}
+            required
+          />
+          <input
+            type="time"
+            name="hora_fin"
+            placeholder="Hora de Fin"
+            value={newSchedule.hora_fin}
+            onChange={handleInputChange}
+            required
+          />
+          <button type="submit">Asignar Horario</button>
+        </form>
+      )}
     </div>
   );
 };
