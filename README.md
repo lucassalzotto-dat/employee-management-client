@@ -1,70 +1,103 @@
-# Getting Started with Create React App
+# Cliente de Gestión de Empleados
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Interfaz de usuario para el Sistema de Gestión de Empleados, que permite a los administradores gestionar empleados y horarios, y a los empleados revisar su horario y solicitar cambios. Este proyecto está construido con React y utiliza Bootstrap para el diseño.
 
-## Available Scripts
+## Estructura del Proyecto
 
-In the project directory, you can run:
+```
+employee-management-client/
+├── public/               # Archivos públicos y plantilla HTML
+├── src/
+│   ├── components/       # Componentes reutilizables
+│   ├── context/          # Contexto para manejo de autenticación
+│   ├── pages/            # Páginas principales de la aplicación
+│   ├── services/         # Servicios para interactuar con la API
+│   └── App.js            # Componente principal de la aplicación
+└── .env                  # Variables de entorno
+```
+
+## Tecnologías
+
+- **React**: Framework de frontend para construir la interfaz de usuario
+- **Bootstrap**: Framework CSS para estilos y diseño responsivo
+- **React Router**: Manejo de rutas y navegación en la aplicación
+- **Context API**: Gestión de estado para la autenticación
+
+## Inicio Rápido
+
+### Requisitos
+
+Asegúrate de tener instalado Node.js.
+
+### Instalación
+
+1. Clona el repositorio:
+   ```bash
+   https://github.com/lucassalzotto-dat/employee-management-client.git
+   cd employee-management-client
+   ```
+
+2. Instala las dependencias:
+   ```bash
+   npm install
+   ```
+
+3. Configura las variables de entorno (ver [Variables de Entorno](#variables-de-entorno)).
+
+4. Inicia la aplicación:
+   ```bash
+   npm start
+   ```
+
+   La aplicación debería estar corriendo en `http://localhost:3001`.
+
+## Variables de Entorno
+
+Crea un archivo `.env` en el directorio raíz con las siguientes variables:
+
+```env
+REACT_APP_API_URL=http://localhost:3000
+```
+
+Asegúrate de que `REACT_APP_API_URL` apunte al servidor backend `employee-management-server` que configuraste.
+
+## Características Principales
+
+### Roles y Autenticación
+
+- **Inicio de Sesión**: Autenticación de usuarios (admin o empleado) con JWT.
+- **Roles**:
+  - **Admin**: Puede gestionar empleados, asignar y editar horarios, y aprobar o rechazar solicitudes de cambio de horario.
+  - **Empleado**: Puede visualizar su propio horario y realizar solicitudes de cambio de horario.
+
+### Funcionalidades
+
+- **Gestión de Empleados** (solo para admin):
+  - Listar todos los empleados
+  - Agregar, editar y eliminar empleados
+- **Gestión de Horarios** (solo para admin):
+  - Asignar y editar horarios de empleados
+- **Solicitudes de Cambio de Horario**:
+  - Los empleados pueden solicitar cambios de horario
+  - Los administradores pueden aprobar o rechazar solicitudes
+
+## Scripts Disponibles
+
+En el directorio del proyecto, puedes ejecutar:
 
 ### `npm start`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Inicia la aplicación en modo de desarrollo.<br>
+Abre [http://localhost:3001](http://localhost:3001) para ver la aplicación en el navegador.
 
 ### `npm test`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Ejecuta las pruebas disponibles en el proyecto (si existen).
 
 ### `npm run build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Construye la aplicación para producción en la carpeta `build`.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Licencia
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Lucas Salzotto & Valentin Hildmann
