@@ -1,3 +1,4 @@
+// src/pages/EmployeeSchedule.js
 import React, { useContext, useEffect, useState } from 'react';
 import AuthContext from '../context/AuthContext';
 import { createScheduleRequest } from '../services/scheduleRequestService';
@@ -13,7 +14,6 @@ const EmployeeSchedule = () => {
   });
   const [message, setMessage] = useState('');
 
-  // Obtener el horario actual del empleado al cargar el componente
   useEffect(() => {
     const fetchSchedule = async () => {
       try {
@@ -49,7 +49,6 @@ const EmployeeSchedule = () => {
     }
   };
 
-  // Formatear la hora para mostrar solo horas y minutos
   const formatTime = (time) => {
     if (!time) return '';
     const [hour, minute] = time.split(':');
@@ -57,43 +56,61 @@ const EmployeeSchedule = () => {
   };
 
   return (
-    <div>
-      <h1>Mi Horario</h1>
-      {message && <p>{message}</p>}
+    <div className="container mt-4">
+      <h1 className="mb-4">Mi Horario</h1>
+      {message && <p className="text-success">{message}</p>}
       {schedule ? (
-        <div>
+        <div className="card p-3 mb-4">
           <p><strong>Fecha:</strong> {schedule.fecha}</p>
           <p><strong>Hora de Inicio:</strong> {formatTime(schedule.hora_inicio)}</p>
           <p><strong>Hora de Fin:</strong> {formatTime(schedule.hora_fin)}</p>
         </div>
       ) : (
-        <p>No tienes un horario asignado.</p>
+        <p className="text-muted">No tienes un horario asignado.</p>
       )}
 
-      <h2>Solicitar Cambio de Horario</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="date"
-          name="fecha_solicitada"
-          value={request.fecha_solicitada}
-          onChange={handleInputChange}
-          required
-        />
-        <input
-          type="time"
-          name="nueva_hora_inicio"
-          value={request.nueva_hora_inicio}
-          onChange={handleInputChange}
-          required
-        />
-        <input
-          type="time"
-          name="nueva_hora_fin"
-          value={request.nueva_hora_fin}
-          onChange={handleInputChange}
-          required
-        />
-        <button type="submit">Solicitar Cambio</button>
+      <h2 className="mb-3">Solicitar Cambio de Horario</h2>
+      <form onSubmit={handleSubmit} className="card p-3">
+        <div className="row g-3">
+          <div className="col-md-4">
+            <input
+              type="date"
+              name="fecha_solicitada"
+              value={request.fecha_solicitada}
+              onChange={handleInputChange}
+              className="form-control"
+              placeholder="Fecha solicitada"
+              required
+            />
+          </div>
+          <div className="col-md-4">
+            <input
+              type="time"
+              name="nueva_hora_inicio"
+              value={request.nueva_hora_inicio}
+              onChange={handleInputChange}
+              className="form-control"
+              placeholder="Hora de Inicio"
+              required
+            />
+          </div>
+          <div className="col-md-4">
+            <input
+              type="time"
+              name="nueva_hora_fin"
+              value={request.nueva_hora_fin}
+              onChange={handleInputChange}
+              className="form-control"
+              placeholder="Hora de Fin"
+              required
+            />
+          </div>
+        </div>
+        <div className="d-flex justify-content-center mt-4">
+          <button type="submit" className="btn btn-primary" style={{ backgroundColor: '#2A5D78' }}>
+            Solicitar Cambio
+          </button>
+        </div>
       </form>
     </div>
   );

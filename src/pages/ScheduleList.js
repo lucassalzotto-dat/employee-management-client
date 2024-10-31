@@ -1,5 +1,4 @@
-// src/pages/ScheduleList.js
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useCallback } from 'react';
 import AuthContext from '../context/AuthContext';
 import { fetchEmployeesWithSchedules, assignSchedule, updateSchedule } from '../services/scheduleService';
 
@@ -21,18 +20,20 @@ const ScheduleList = () => {
     return `${hour}:${minute}`;
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await fetchEmployeesWithSchedules(user.token);
-        setEmployees(data);
-      } catch (error) {
-        console.error('Error al obtener empleados con horarios:', error);
-        setError('No se pudo obtener la lista de horarios.');
-      }
-    };
-    fetchData();
+  // Definir fetchSchedules como una función de callback para que sea estable y se pueda usar en useEffect
+  const fetchSchedules = useCallback(async () => {
+    try {
+      const data = await fetchEmployeesWithSchedules(user.token);
+      setEmployees(data);
+    } catch (error) {
+      console.error('Error al obtener empleados con horarios:', error);
+      setError('No se pudo obtener la lista de horarios.');
+    }
   }, [user.token]);
+
+  useEffect(() => {
+    fetchSchedules();
+  }, [fetchSchedules]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -46,15 +47,9 @@ const ScheduleList = () => {
   const handleAssignSchedule = async (e) => {
     e.preventDefault();
     try {
-      const assignedSchedule = await assignSchedule(newSchedule, user.token);
-      setEmployees((prevEmployees) =>
-        prevEmployees.map((emp) =>
-          emp.id === newSchedule.id_empleado
-            ? { ...emp, schedule: assignedSchedule }
-            : emp
-        )
-      );
+      await assignSchedule(newSchedule, user.token);
       setNewSchedule({ id_empleado: '', fecha: '', hora_inicio: '', hora_fin: '' });
+      await fetchSchedules(); // Actualiza la lista de horarios después de asignar uno
     } catch (error) {
       console.error('Error al asignar horario:', error);
       setError('No se pudo asignar el horario.');
@@ -68,19 +63,13 @@ const ScheduleList = () => {
   const handleUpdateSchedule = async (e) => {
     e.preventDefault();
     try {
-      const updatedSchedule = await updateSchedule(editingSchedule.id, {
+      await updateSchedule(editingSchedule.id, {
         fecha: editingSchedule.fecha,
         hora_inicio: editingSchedule.hora_inicio,
         hora_fin: editingSchedule.hora_fin
       }, user.token);
-      setEmployees((prevEmployees) =>
-        prevEmployees.map((emp) =>
-          emp.schedule && emp.schedule.id === editingSchedule.id
-            ? { ...emp, schedule: updatedSchedule }
-            : emp
-        )
-      );
       setEditingSchedule(null);
+      await fetchSchedules(); // Actualiza la lista después de editar el horario
     } catch (error) {
       console.error('Error al actualizar horario:', error);
       setError('No se pudo actualizar el horario.');
@@ -88,100 +77,125 @@ const ScheduleList = () => {
   };
 
   return (
-    <div>
-      <h1>Lista de Empleados y sus Horarios</h1>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <ul>
+    <div className="container mt-4">
+      <h1 className="mb-4">Lista de Empleados y sus Horarios</h1>
+      {error && <p className="text-danger">{error}</p>}
+      <ul className="list-group mb-4">
         {employees.map((emp) => (
-          <li key={emp.id}>
-            <strong>{emp.nombre}</strong> - {emp.posicion}
-            {emp.schedule ? (
-              <>
-                <p>
+          <li key={emp.id} className="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <strong>{emp.nombre}</strong> - {emp.posicion}
+              {emp.schedule ? (
+                <p className="mb-1">
                   Horario: {emp.schedule.fecha} de {formatTime(emp.schedule.hora_inicio)} a {formatTime(emp.schedule.hora_fin)}
                 </p>
-                <button onClick={() => handleEditSchedule(emp.schedule)}>Editar Horario</button>
-              </>
-            ) : (
-              <p>Horario: No asignado</p>
+              ) : (
+                <p className="mb-1">Horario: No asignado</p>
+              )}
+            </div>
+            {emp.schedule && (
+              <button className="btn btn-sm" style={{ backgroundColor: '#2A5D78', color: 'white' }} onClick={() => handleEditSchedule(emp.schedule)}>Editar Horario</button>
             )}
           </li>
         ))}
       </ul>
 
-      {editingSchedule ? (
-        <form onSubmit={handleUpdateSchedule}>
-          <h2>Editar Horario</h2>
-          <input
-            type="date"
-            name="fecha"
-            placeholder="Fecha"
-            value={editingSchedule.fecha}
-            onChange={handleInputChange}
-            required
-          />
-          <input
-            type="time"
-            name="hora_inicio"
-            placeholder="Hora de Inicio"
-            value={editingSchedule.hora_inicio}
-            onChange={handleInputChange}
-            required
-          />
-          <input
-            type="time"
-            name="hora_fin"
-            placeholder="Hora de Fin"
-            value={editingSchedule.hora_fin}
-            onChange={handleInputChange}
-            required
-          />
-          <button type="submit">Guardar Cambios</button>
-          <button type="button" onClick={() => setEditingSchedule(null)}>Cancelar</button>
-        </form>
-      ) : (
-        <form onSubmit={handleAssignSchedule}>
-          <h2>Asignar Horario a un Empleado</h2>
-          <select
-            name="id_empleado"
-            value={newSchedule.id_empleado}
-            onChange={handleInputChange}
-            required
-          >
-            <option value="">Seleccione un empleado</option>
-            {employees.map((emp) => (
-              <option key={emp.id} value={emp.id}>
-                {emp.nombre} - {emp.posicion}
-              </option>
-            ))}
-          </select>
-          <input
-            type="date"
-            name="fecha"
-            placeholder="Fecha"
-            value={newSchedule.fecha}
-            onChange={handleInputChange}
-            required
-          />
-          <input
-            type="time"
-            name="hora_inicio"
-            placeholder="Hora de Inicio"
-            value={newSchedule.hora_inicio}
-            onChange={handleInputChange}
-            required
-          />
-          <input
-            type="time"
-            name="hora_fin"
-            placeholder="Hora de Fin"
-            value={newSchedule.hora_fin}
-            onChange={handleInputChange}
-            required
-          />
-          <button type="submit">Asignar Horario</button>
-        </form>
-      )}
+      <div className="card p-4">
+        {editingSchedule ? (
+          <form onSubmit={handleUpdateSchedule}>
+            <h2 className="mb-3">Editar Horario</h2>
+            <div className="row mb-3">
+              <div className="col">
+                <input
+                  type="date"
+                  name="fecha"
+                  className="form-control"
+                  value={editingSchedule.fecha}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="col">
+                <input
+                  type="time"
+                  name="hora_inicio"
+                  className="form-control"
+                  value={editingSchedule.hora_inicio}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="col">
+                <input
+                  type="time"
+                  name="hora_fin"
+                  className="form-control"
+                  value={editingSchedule.hora_fin}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+            </div>
+            <button type="submit" className="btn me-2" style={{ backgroundColor: '#2A5D78', color: 'white' }}>Guardar Cambios</button>
+            <button type="button" className="btn btn-secondary" onClick={() => setEditingSchedule(null)}>Cancelar</button>
+          </form>
+        ) : (
+          <form onSubmit={handleAssignSchedule}>
+            <h2 className="mb-3">Asignar Horario a un Empleado</h2>
+            <div className="row mb-3">
+              <div className="col">
+                <select
+                  name="id_empleado"
+                  className="form-select"
+                  value={newSchedule.id_empleado}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">Seleccione un empleado</option>
+                  {employees.map((emp) => (
+                    <option key={emp.id} value={emp.id}>
+                      {emp.nombre} - {emp.posicion}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="col">
+                <input
+                  type="date"
+                  name="fecha"
+                  className="form-control"
+                  value={newSchedule.fecha}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="col">
+                <input
+                  type="time"
+                  name="hora_inicio"
+                  className="form-control"
+                  value={newSchedule.hora_inicio}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="col">
+                <input
+                  type="time"
+                  name="hora_fin"
+                  className="form-control"
+                  value={newSchedule.hora_fin}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+            </div>
+            <div className="d-flex justify-content-center">
+              <button type="submit" className="btn" style={{ backgroundColor: '#2A5D78', color: 'white' }}>Asignar Horario</button>
+            </div>
+          </form>
+        )}
+      </div>
     </div>
   );
 };

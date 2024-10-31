@@ -61,7 +61,8 @@ const Login = () => {
             required 
           />
         </div>
-        <button type="submit" className="btn btn-primary w-100">Ingresar</button>
+        <button type="submit" className="btn w-100" style={{ backgroundColor: '#2A5D78', color: 'white' }}>Ingresar</button>
+
       </form>
     </div>
   );
