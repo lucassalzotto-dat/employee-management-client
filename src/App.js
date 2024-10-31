@@ -13,40 +13,60 @@ const App = () => {
 
   return (
     <Router>
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+      <nav className="navbar navbar-expand-lg" style={{ backgroundColor: '#1d3d54' }}> {/* Cambiamos el fondo aquí */}
         <div className="container">
-          <Link to="/" className="navbar-brand">Employee Management</Link>
-          <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <Link to="/" className="navbar-brand text-white">
+            Employee Management
+          </Link>
+          <button
+            className="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
             <span className="navbar-toggler-icon"></span>
           </button>
           <div className="collapse navbar-collapse" id="navbarNav">
             <ul className="navbar-nav ms-auto">
               <li className="nav-item">
-                <Link to="/login" className="nav-link">Login</Link>
+                <Link to="/login" className="nav-link text-white"> {/* Texto blanco */}
+                  Iniciar Sesión
+                </Link>
               </li>
               {user && user.rol === 'admin' && (
                 <>
                   <li className="nav-item">
-                    <Link to="/employees" className="nav-link">Empleados</Link>
+                    <Link to="/employees" className="nav-link text-white"> {/* Texto blanco */}
+                      Empleados
+                    </Link>
                   </li>
                   <li className="nav-item">
-                    <Link to="/schedules" className="nav-link">Horarios</Link>
+                    <Link to="/schedules" className="nav-link text-white"> {/* Texto blanco */}
+                      Horarios
+                    </Link>
                   </li>
                   <li className="nav-item">
-                    <Link to="/schedule-requests" className="nav-link">Solicitudes de Cambio</Link>
+                    <Link to="/schedule-requests" className="nav-link text-white"> {/* Texto blanco */}
+                      Solicitudes de Cambio
+                    </Link>
                   </li>
                 </>
               )}
               {user && user.rol === 'empleado' && (
                 <li className="nav-item">
-                  <Link to="/mi-horario" className="nav-link">Mi Horario</Link>
+                  <Link to="/mi-horario" className="nav-link text-white"> {/* Texto blanco */}
+                    Mi Horario
+                  </Link>
                 </li>
               )}
             </ul>
           </div>
         </div>
       </nav>
-      
+
       <div className="container mt-4">
         <Routes>
           <Route path="/login" element={<Login />} />
@@ -55,7 +75,7 @@ const App = () => {
             <>
               <Route path="/employees" element={<EmployeeList />} />
               <Route path="/schedules" element={<ScheduleList />} />
-              <Route path="/schedule-requests" element={<ScheduleRequestList />} /> {/* Corregido */}
+              <Route path="/schedule-requests" element={<ScheduleRequestList />} />
             </>
           )}
           {/* Ruta protegida solo para el rol empleado */}
